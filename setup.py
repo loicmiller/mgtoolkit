@@ -13,11 +13,6 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as test_command
 
-if sys.version_info[:2] != (2, 7):
-    print("mgtoolkit requires Python 2.7 (%d.%d detected)." %
-          sys.version_info[:2])
-    sys.exit(-1)
-
 
 # This is a plug-in for setuptools that will invoke py.test
 # when you run python setup.py test
@@ -39,16 +34,16 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0',
-    'configobj==4.7.0',
-    'pytest==2.7.0',
-    'numpy==1.10.2'
+    'Click',
+    'configobj',
+    'pytest',
+    'numpy'
 ]
 
 # noinspection PyPep8
 setup(
     name='mgtoolkit',
-    version='1.0.7',
+    version='2.0.7',
     description="This is a Python package for implementing metagraphss.",
     long_description=readme + '\n\n' + history,
     author="Dinesha Ranathunga",
@@ -71,7 +66,7 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: System :: Networking',
         'Topic :: Scientific/Engineering :: Mathematics',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
         'Natural Language :: English'
     ],
 
