@@ -156,9 +156,6 @@ class Edge(object):
                 self.outvertex == other.outvertex and
                 self.attributes == other.attributes)
 
-    def __hash__(self):
-        return hash((str(self.invertex), str(self.outvertex), str(self.attributes)))
-
 
 class Metapath(object):
     """ Represents a metapath between a source and a target node in a metagraph.
@@ -1214,7 +1211,7 @@ class Metagraph(object):
             index += 1
 
         post_merge_triples = dict()
-        for index, triples_list in list(triples_to_merge.items()):
+        for index, triples_list in triples_to_merge.items():
             triple1 = triples_to_merge[index]
             if triple1 in triples_list_l0:
                 triples_list_l0.remove(triple1)
@@ -1245,7 +1242,7 @@ class Metagraph(object):
         triple_list_l0_copy = copy.copy(triples_list_l0)
 
         post_merge_triples = dict()
-        for index, triples_list in list(triples_to_merge.items()):
+        for index, triples_list in triples_to_merge.items():
             triple1 = triple_list_l0_copy[index]
             if triple1 in triples_list_l0:
                 triples_list_l0.remove(triple1)
@@ -2377,11 +2374,7 @@ class MetagraphHelper:
         if len(result) == 0:
             return None
 
-        unique_result = []
-        for el in result:
-            if el not in unique_result:
-                unique_result.append(el)
-        return unique_result
+        return list(set(result))
 
     def multiply_triple_lists(self, triple_list1, triple_list2, x_i, x_j, x_k):
         """ Multiplies two list of Triple objects and returns the result.
@@ -2406,11 +2399,7 @@ class MetagraphHelper:
                     triples_list.append(temp)
 
         if len(triples_list)>0:
-            unique_triples_list = []
-            for triple in triples_list:
-                if triple not in unique_triples_list:
-                    unique_triples_list.append(triple)
-            return unique_triples_list
+            return list(set(triples_list))
 
         return []
 
@@ -2945,7 +2934,7 @@ class MetagraphHelper:
             dot_output.append('compound=true; \n')
 
             # clusters first
-            for index, content in list(clusters.items()):
+            for index, content in clusters.items():
                 dot_output.append('subgraph cluster%s { \n'%index)
                 for elt in list(content):
                     #if '2202' in elt:
@@ -3206,3 +3195,34 @@ class MetagraphHelper:
                 result.append(item)
 
         return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

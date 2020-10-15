@@ -62,10 +62,10 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'mgtoolkit'
+project = 'mgtoolkit'
 # noinspection PyShadowingBuiltins
-copyright = u"2017, Dinesha Ranathunga"
-author = u'Dinesha Ranathunga'
+copyright = "2017, Dinesha Ranathunga"
+author = 'Dinesha Ranathunga'
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -218,8 +218,8 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'mgtoolkit.tex',
-     u'mgtoolkit Documentation',
-     u'Dinesha Ranathunga', 'manual'),
+     'mgtoolkit Documentation',
+     'Dinesha Ranathunga', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at
@@ -249,8 +249,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'mgtoolkit',
-     u'mgtoolkit Documentation',
-     [u'Dinesha Ranathunga'], 1)
+     'mgtoolkit Documentation',
+     ['Dinesha Ranathunga'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -264,8 +264,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'mgtoolkit',
-     u'mgtoolkit Documentation',
-     u'Dinesha Ranathunga',
+     'mgtoolkit Documentation',
+     'Dinesha Ranathunga',
      'mgtoolkit',
      'One line description of project.',
      'Miscellaneous'),
