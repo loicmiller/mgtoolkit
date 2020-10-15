@@ -156,7 +156,7 @@ class Edge(object):
                 self.outvertex == other.outvertex and
                 self.attributes == other.attributes)
 
-    def __hash__(self):
+    def __hash__(self): # https://stackoverflow.com/questions/55753498/hash-method-is-defaulted-in-python-2-not-python-3
         return hash((str(self.invertex), str(self.outvertex), str(self.attributes)))
 
 
