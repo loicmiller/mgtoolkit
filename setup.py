@@ -27,7 +27,7 @@ class PyTest(test_command):
         import pytest  # import here, because outside the required eggs aren't loaded yet
         sys.exit(pytest.main(self.test_args))
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
@@ -82,5 +82,3 @@ setup(
     }
 
 )
-
-
