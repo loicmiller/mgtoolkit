@@ -157,7 +157,7 @@ class Edge(object):
                 self.attributes == other.attributes)
 
     def __hash__(self): # https://stackoverflow.com/questions/55753498/hash-method-is-defaulted-in-python-2-not-python-3
-        return hash((str(self.invertex), str(self.outvertex), str(self.attributes)))
+        return hash((str(sorted(list(self.invertex))), str(sorted(list(self.outvertex))), str(sorted(list(self.attributes)))))
 
 
 class Metapath(object):
@@ -489,22 +489,29 @@ class Metagraph(object):
         size = len(self.generating_set)
         adj_matrix = MetagraphHelper().get_null_matrix(size, size)
 
+        #print("adj_matrix:")
+        #print(adj_matrix)
+
         # create lookup table
         count=1
         triples_lookup=dict()
         for edge in self.edges:
-             for elt1 in edge.invertex:
-                  for elt2 in edge.outvertex:
-                      coinputs = self.get_coinputs(edge, elt1)
-                      cooutputs = self.get_cooutputs(edge, elt2)
-                      triple = Triple(coinputs, cooutputs, edge)
-                      if (elt1,elt2) not in triples_lookup:
-                         triples_lookup[(elt1,elt2)] = []
-                      triples_lookup[(elt1,elt2)].append(triple)
-                      count+=1
+            for elt1 in edge.invertex:
+                for elt2 in edge.outvertex:
+                    coinputs = self.get_coinputs(edge, elt1)
+                    cooutputs = self.get_cooutputs(edge, elt2)
+                    triple = Triple(coinputs, cooutputs, edge)
+                    if (elt1,elt2) not in triples_lookup:
+                        triples_lookup[(elt1,elt2)] = []
+                    triples_lookup[(elt1,elt2)].append(triple)
+                    count+=1
+
+        #print("triples lookup")
+        #from pprint import pprint
+        #pprint(triples_lookup)
 
         count=1
-        gen_elts = list(self.generating_set)
+        gen_elts = sorted(list(self.generating_set))
         for i in range(size):
              for j in range(size):
                   x_i = gen_elts[i]
@@ -514,6 +521,9 @@ class Metagraph(object):
                   except BaseException as e:
                       pass
 
+        #print("FINAL")
+        #print(gen_elts)
+        #pprint(adj_matrix)
         # noinspection PyCallingNonCallable
         return matrix(adj_matrix)
 
@@ -613,6 +623,10 @@ class Metagraph(object):
 
         adjacency_matrix = self.adjacency_matrix().tolist()
 
+        #print("adjacency_matrix:")
+        #from pprint import pprint
+        #pprint(adjacency_matrix)
+
         i = 0
         size = len(self.generating_set)
         a = dict()
@@ -638,6 +652,10 @@ class Metagraph(object):
         return matrix(a_star)
 
     def get_all_metapaths_from(self, source, target):
+        try:
+            self.counter += 1
+        except AttributeError:
+            self.counter = 0
         """ Retrieves all metapaths between given source and target in the metagraph.
         :param source: set
         :param target: set
@@ -663,10 +681,46 @@ class Metagraph(object):
 
         metapaths = []
         all_applicable_input_rows = []
-        for x_i in source:
-            index = list(self.generating_set).index(x_i)
+        for x_i in sorted(source):
+            index = sorted(list(self.generating_set)).index(x_i)
             if index not in all_applicable_input_rows:
                 all_applicable_input_rows.append(index)
+
+
+        if self.counter == 1:
+            with open("testfile.txt", 'r') as myfile:
+                content = myfile.readlines()
+            if not content:
+                with open("testfile.txt", 'w') as myfile:
+                    myfile.write(str(self.a_star))
+
+            new_struct = []
+            with open("testfile.txt", 'r') as myfile:
+                content = myfile.readlines()
+                print("CONTENT")
+                print(content)
+
+                mylists = content[0].split('], [')
+                import pprint
+                for mylist in mylists:
+                    print(mylist)
+
+                for line in content:
+                    print("line {}".format(line))
+                    new_el = line[1:-2].split(',')
+                    print("new_el {}".format(new_el))
+                    new_el.append(new_struct)
+                print("new_struct")
+                print(new_struct)
+
+        '''
+        print("Source: {}".format(source))
+        print("Target: {}".format(target))
+        print("a_star:")
+        from pprint import pprint
+        pprint(self.a_star)
+        print("Applicable input rows: {}".format(all_applicable_input_rows))
+        '''
 
         cumulative_output_global = []
         cumulative_edges_global = []
@@ -675,7 +729,7 @@ class Metagraph(object):
             cumulative_output_local = []
             cumulative_edges_local = []
             for x_j in target:
-                j = list(self.generating_set).index(x_j)
+                j = sorted(list(self.generating_set)).index(x_j)
 
                 if self.a_star[i][j] is not None:
                     mp_exist_for_row = True
@@ -718,6 +772,8 @@ class Metagraph(object):
             else:
                 break
 
+        #if len(metapaths)>0:
+        #    print("IN LIB: {}".format(len(metapaths)))
         if len(metapaths)>0:
             #result=[]
             #for path in metapaths:
@@ -1799,6 +1855,35 @@ class ConditionalMetagraph(Metagraph):
 
         return all_metapaths
 
+    def is_input_dominant_metapath(self, metapath):
+        """ Checks if the given metapath is an input-dominant metapath.
+        :param metapath: Metapath object
+        :return: boolean
+        """
+
+        if metapath is None:
+            raise MetagraphException('metapath', resources['value_null'])
+
+        from itertools import combinations
+        # check input metapath is valid
+        if not self.is_metapath(metapath):
+            return False
+
+        # get all proper subsets of subset1
+        all_subsets = sum(map(lambda r: list(combinations(metapath.source.intersection(self.variables_set), r)), range(1, len(metapath.source)+1)), [])
+        #print(all_subsets)
+        # if one proper subset has a metapath to subset2 then not input dominant
+        for subset in all_subsets:
+            if isinstance(subset, tuple):
+                subset = set(list(subset))
+            # must be proper subset
+            if len(subset) < len(metapath.source.intersection(self.variables_set)):
+                metapath1 = self.get_all_metapaths_from(subset, metapath.target)
+                if metapath1 is not None and len(metapath1) > 0:
+                    #print('source: %s, target: %s'%(subset, metapath.target))
+                    return False
+        return True
+
     def has_conflicts(self, metapath):
         """Checks whether the given metapath has any conflicts.
         :param metapath: Metapath object
@@ -2332,8 +2417,8 @@ class MetagraphHelper:
             a_ik = adjacency_matrix1[i][k]
             b_kj = adjacency_matrix2[k][j]
             #print('multiply_triple_lists')
-            temp = self.multiply_triple_lists(a_ik, b_kj, list(generator_set1)[i],
-                                              list(generator_set1)[j], list(generator_set1)[k])
+            temp = self.multiply_triple_lists(a_ik, b_kj, sorted(list(generator_set1))[i],
+                                              sorted(list(generator_set1))[j], sorted(list(generator_set1))[k])
             if temp is not None:
                 #print('len(temp): %s'%len(temp))
                 for triple in temp:
@@ -2368,8 +2453,8 @@ class MetagraphHelper:
         for k in range(size):
             a_ik = adjacency_matrix1[i][k]
             b_kj = adjacency_matrix2[k][j]
-            temp = self.multiply_triple_lists(a_ik, b_kj, list(generator_set1)[i],
-                                              list(generator_set1)[j], list(generator_set1)[k])
+            temp = self.multiply_triple_lists(a_ik, b_kj, sorted(list(generator_set1))[i],
+                                              sorted(list(generator_set1))[j], sorted(list(generator_set1))[k])
 
             if temp is not None and len(temp)>0:
                 result+=temp
