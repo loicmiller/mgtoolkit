@@ -492,9 +492,6 @@ class Metagraph(object):
         size = len(self.generating_set)
         adj_matrix = MetagraphHelper().get_null_matrix(size, size)
 
-        #print("adj_matrix:")
-        #print(adj_matrix)
-
         # create lookup table
         triples_lookup=dict()
         for edge in self.edges:
@@ -507,10 +504,6 @@ class Metagraph(object):
                         triples_lookup[(elt1,elt2)] = []
                     triples_lookup[(elt1,elt2)].append(triple)
 
-        #print("triples lookup")
-        #from pprint import pprint
-        #pprint(triples_lookup)
-
         gen_elts = sorted(list(self.generating_set))
         for i in range(size):
              for j in range(size):
@@ -521,9 +514,6 @@ class Metagraph(object):
                   except BaseException as e:
                       pass
 
-        #print("FINAL")
-        #print(gen_elts)
-        #pprint(adj_matrix)
         # noinspection PyCallingNonCallable
         return matrix(adj_matrix)
 
@@ -623,10 +613,6 @@ class Metagraph(object):
 
         adjacency_matrix = self.adjacency_matrix().tolist()
 
-        #print("adjacency_matrix:")
-        #from pprint import pprint
-        #pprint(adjacency_matrix)
-
         i = 0
         size = len(self.generating_set)
         a = dict()
@@ -652,11 +638,6 @@ class Metagraph(object):
         return matrix(a_star)
 
     def get_all_metapaths_from(self, source, target):
-        try:
-            self.counter += 1
-        except AttributeError:
-            self.counter = 0
-        #print("ALL MP CTR {}".format(self.counter))
         """ Retrieves all metapaths between given source and target in the metagraph.
         :param source: set
         :param target: set
@@ -686,92 +667,6 @@ class Metagraph(object):
             index = sorted(list(self.generating_set)).index(x_i)
             if index not in all_applicable_input_rows:
                 all_applicable_input_rows.append(index)
-
-        if self.counter != -1:
-            #print("ALL MP CTR2 {}".format(self.counter))
-            filename = "testfile-{}.dat".format(now)
-            #with open("testfile.txt", 'r') as myfile:
-            #    content = myfile.readlines()
-            #if not content:
-            with open(filename, 'a') as myfile:
-                for row in self.a_star:
-                    for box in row:
-                        if box == None:
-                            myfile.write("None")
-                        else:
-                            for triple in box:
-                                #print(type(triple))
-                                #print(triple)
-                                #if isinstance(triple, list):
-                                #    print(type(triple[0].edges))
-                                #    print(triple[0].edges)
-                                #else:
-                                #    print(type(triple.edges))
-                                #    print(triple.edges)
-                                stredges = ""
-                                coinputs = ""
-                                cooutputs = ""
-                                if isinstance(triple, list):
-                                    if isinstance(triple[0].edges, list):
-                                        for edge in triple[0].edges:
-                                            stredges =  stredges + " (" + str(sorted(edge.invertex)) + ", " + str(sorted(edge.outvertex)) + ")"
-                                    else:
-                                        stredges =  stredges + " (" + str(sorted(triple[0].edges.invertex)) + ", " + str(sorted(triple[0].edges.outvertex)) + ")"
-                                    if triple[0].coinputs == None:
-                                        coinputs = "None"
-                                    else:
-                                        coinputs = sorted(list(triple[0].coinputs))
-                                    if triple[0].cooutputs == None:
-                                        cooutputs = "None"
-                                    else:
-                                        cooutputs = sorted(list(triple[0].cooutputs))
-                                    myfile.write("Triple({}, {}, {})".format(coinputs, cooutputs, stredges))
-                                else:
-                                    if isinstance(triple.edges, list):
-                                        for edge in triple.edges:
-                                            stredges =  stredges + " (" + str(sorted(edge.invertex)) + ", " + str(sorted(edge.outvertex)) + ")"
-                                    else:
-                                        stredges =  stredges + " (" + str(sorted(triple.edges.invertex)) + ", " + str(sorted(triple.edges.outvertex)) + ")"
-                                    if triple.coinputs == None:
-                                        coinputs = "None"
-                                    else:
-                                        coinputs = sorted(list(triple.coinputs))
-                                    if triple.cooutputs == None:
-                                        cooutputs = "None"
-                                    else:
-                                        cooutputs = sorted(list(triple.cooutputs))
-                                    myfile.write("Triple({}, {}, {})".format(coinputs, cooutputs, stredges))
-                myfile.write("\n")
-
-            '''
-            new_struct = []
-            with open("testfile.txt", 'r') as myfile:
-                content = myfile.readlines()
-                print("CONTENT")
-                print(content)
-
-                mylists = content[0].split('], [')
-                import pprint
-                for mylist in mylists:
-                    print(mylist)
-
-                for line in content:
-                    print("line {}".format(line))
-                    new_el = line[1:-2].split(',')
-                    print("new_el {}".format(new_el))
-                    new_el.append(new_struct)
-                print("new_struct")
-                print(new_struct)
-            '''
-
-        '''
-        print("Source: {}".format(source))
-        print("Target: {}".format(target))
-        print("a_star:")
-        from pprint import pprint
-        pprint(self.a_star)
-        print("Applicable input rows: {}".format(all_applicable_input_rows))
-        '''
 
         cumulative_output_global = []
         cumulative_edges_global = []
@@ -823,14 +718,7 @@ class Metagraph(object):
             else:
                 break
 
-        #if len(metapaths)>0:
-        #    print("IN LIB: {}".format(len(metapaths)))
         if len(metapaths)>0:
-            #result=[]
-            #for path in metapaths:
-            #    mp = Metapath(source, target, list(path))
-            #    result.append(mp)
-            #return result
 
             valid_metapaths = []
             processed_edge_lists=[]
@@ -951,11 +839,6 @@ class Metagraph(object):
         return False
 
     def is_edge_dominant_metapath(self, metapath):
-        try:
-            self.counter += 1
-        except AttributeError:
-            self.counter = 0
-        #print("EDG CTR {}".format(self.counter))
         """ Checks if the given metapath is an edge-dominant metapath.
         :param metapath: Metapath object
         :return: boolean
@@ -1004,7 +887,6 @@ class Metagraph(object):
                     subset = set(list(subset))
                 metapath1 = self.get_all_metapaths_from(subset, metapath.target)
                 if metapath1 is not None and len(metapath1) > 0:
-                    #print('source: %s, target: %s'%(subset, metapath.target))
                     return False
         return True
 
@@ -1687,7 +1569,6 @@ class Metagraph(object):
         all_targets2 = copy.copy(all_sources2)
 
         all_metapaths1 = []
-        i = 1
         #s1 =  len(all_sources1)
         #t1 =  len(all_targets1)
         #s2 =  len(all_sources2)
@@ -1699,8 +1580,6 @@ class Metagraph(object):
                     mp = self.get_all_metapaths_from(set(source), set(target))
                     if mp is not None and len(mp) > 0 and (mp not in all_metapaths1):
                         all_metapaths1.append(mp)
-                    #print(i)
-                    i += 1
 
         all_metapaths2 = []
         for source in all_sources2:
@@ -1913,10 +1792,6 @@ class ConditionalMetagraph(Metagraph):
         return all_metapaths
 
     def is_input_dominant_metapath(self, metapath):
-        try:
-            self.counter += 1
-        except AttributeError:
-            self.counter = 0
         """ Checks if the given metapath is an input-dominant metapath.
         :param metapath: Metapath object
         :return: boolean
@@ -1933,27 +1808,14 @@ class ConditionalMetagraph(Metagraph):
         # get all proper subsets of subset1
         all_subsets = sum(map(lambda r: list(combinations(metapath.source.intersection(self.variables_set), r)), range(1, len(metapath.source)+1)), [])
 
-        #print("INP CTR {} - {}".format(self.counter, len(all_subsets)))
-        #print(all_subsets)
         # if one proper subset has a metapath to subset2 then not input dominant
-        if len(all_subsets) > 100:
-            print(metapath.source.intersection(self.variables_set))
-            print(metapath.target)
-            print(all_subsets)
-            print("sort")
-            print(sorted(all_subsets))
-            print()
-        #TODO SORT Tuples by 1el then second then ...
         for subset_tuple in sorted(all_subsets):
             if isinstance(subset_tuple, tuple):
                 subset = set(list(subset_tuple))
-            #if len(all_subsets) > 2:
-            #    print(subset)
             # must be proper subset
             if len(subset) < len(metapath.source.intersection(self.variables_set)):
                 metapath1 = self.get_all_metapaths_from(subset, metapath.target)
                 if metapath1 is not None and len(metapath1) > 0:
-                    #print('source: %s, target: %s'%(subset, metapath.target))
                     return False
         return True
 
