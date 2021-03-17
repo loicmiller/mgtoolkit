@@ -4,6 +4,9 @@ from numpy import matrix
 import copy
 import math
 
+import datetime
+now = str(datetime.datetime.now().isoformat())
+
 
 def singleton(cls):
     """A helper function to ease implementing singletons.
@@ -493,24 +496,21 @@ class Metagraph(object):
         #print(adj_matrix)
 
         # create lookup table
-        count=1
         triples_lookup=dict()
         for edge in self.edges:
-            for elt1 in edge.invertex:
-                for elt2 in edge.outvertex:
+            for elt1 in sorted(edge.invertex):
+                for elt2 in sorted(edge.outvertex):
                     coinputs = self.get_coinputs(edge, elt1)
                     cooutputs = self.get_cooutputs(edge, elt2)
                     triple = Triple(coinputs, cooutputs, edge)
                     if (elt1,elt2) not in triples_lookup:
                         triples_lookup[(elt1,elt2)] = []
                     triples_lookup[(elt1,elt2)].append(triple)
-                    count+=1
 
         #print("triples lookup")
         #from pprint import pprint
         #pprint(triples_lookup)
 
-        count=1
         gen_elts = sorted(list(self.generating_set))
         for i in range(size):
              for j in range(size):
@@ -656,6 +656,7 @@ class Metagraph(object):
             self.counter += 1
         except AttributeError:
             self.counter = 0
+        #print("ALL MP CTR {}".format(self.counter))
         """ Retrieves all metapaths between given source and target in the metagraph.
         :param source: set
         :param target: set
@@ -686,14 +687,63 @@ class Metagraph(object):
             if index not in all_applicable_input_rows:
                 all_applicable_input_rows.append(index)
 
+        if self.counter != -1:
+            #print("ALL MP CTR2 {}".format(self.counter))
+            filename = "testfile-{}.dat".format(now)
+            #with open("testfile.txt", 'r') as myfile:
+            #    content = myfile.readlines()
+            #if not content:
+            with open(filename, 'a') as myfile:
+                for row in self.a_star:
+                    for box in row:
+                        if box == None:
+                            myfile.write("None")
+                        else:
+                            for triple in box:
+                                #print(type(triple))
+                                #print(triple)
+                                #if isinstance(triple, list):
+                                #    print(type(triple[0].edges))
+                                #    print(triple[0].edges)
+                                #else:
+                                #    print(type(triple.edges))
+                                #    print(triple.edges)
+                                stredges = ""
+                                coinputs = ""
+                                cooutputs = ""
+                                if isinstance(triple, list):
+                                    if isinstance(triple[0].edges, list):
+                                        for edge in triple[0].edges:
+                                            stredges =  stredges + " (" + str(sorted(edge.invertex)) + ", " + str(sorted(edge.outvertex)) + ")"
+                                    else:
+                                        stredges =  stredges + " (" + str(sorted(triple[0].edges.invertex)) + ", " + str(sorted(triple[0].edges.outvertex)) + ")"
+                                    if triple[0].coinputs == None:
+                                        coinputs = "None"
+                                    else:
+                                        coinputs = sorted(list(triple[0].coinputs))
+                                    if triple[0].cooutputs == None:
+                                        cooutputs = "None"
+                                    else:
+                                        cooutputs = sorted(list(triple[0].cooutputs))
+                                    myfile.write("Triple({}, {}, {})".format(coinputs, cooutputs, stredges))
+                                else:
+                                    if isinstance(triple.edges, list):
+                                        for edge in triple.edges:
+                                            stredges =  stredges + " (" + str(sorted(edge.invertex)) + ", " + str(sorted(edge.outvertex)) + ")"
+                                    else:
+                                        stredges =  stredges + " (" + str(sorted(triple.edges.invertex)) + ", " + str(sorted(triple.edges.outvertex)) + ")"
+                                    if triple.coinputs == None:
+                                        coinputs = "None"
+                                    else:
+                                        coinputs = sorted(list(triple.coinputs))
+                                    if triple.cooutputs == None:
+                                        cooutputs = "None"
+                                    else:
+                                        cooutputs = sorted(list(triple.cooutputs))
+                                    myfile.write("Triple({}, {}, {})".format(coinputs, cooutputs, stredges))
+                myfile.write("\n")
 
-        if self.counter == 1:
-            with open("testfile.txt", 'r') as myfile:
-                content = myfile.readlines()
-            if not content:
-                with open("testfile.txt", 'w') as myfile:
-                    myfile.write(str(self.a_star))
-
+            '''
             new_struct = []
             with open("testfile.txt", 'r') as myfile:
                 content = myfile.readlines()
@@ -712,6 +762,7 @@ class Metagraph(object):
                     new_el.append(new_struct)
                 print("new_struct")
                 print(new_struct)
+            '''
 
         '''
         print("Source: {}".format(source))
@@ -900,6 +951,11 @@ class Metagraph(object):
         return False
 
     def is_edge_dominant_metapath(self, metapath):
+        try:
+            self.counter += 1
+        except AttributeError:
+            self.counter = 0
+        #print("EDG CTR {}".format(self.counter))
         """ Checks if the given metapath is an edge-dominant metapath.
         :param metapath: Metapath object
         :return: boolean
@@ -964,6 +1020,7 @@ class Metagraph(object):
         # check input metapath is valid
         if not self.is_metapath(metapath):
             return False
+
 
         if (self.is_edge_dominant_metapath(metapath) and
            self.is_input_dominant_metapath(metapath)):
@@ -1856,6 +1913,10 @@ class ConditionalMetagraph(Metagraph):
         return all_metapaths
 
     def is_input_dominant_metapath(self, metapath):
+        try:
+            self.counter += 1
+        except AttributeError:
+            self.counter = 0
         """ Checks if the given metapath is an input-dominant metapath.
         :param metapath: Metapath object
         :return: boolean
@@ -1871,11 +1932,23 @@ class ConditionalMetagraph(Metagraph):
 
         # get all proper subsets of subset1
         all_subsets = sum(map(lambda r: list(combinations(metapath.source.intersection(self.variables_set), r)), range(1, len(metapath.source)+1)), [])
+
+        #print("INP CTR {} - {}".format(self.counter, len(all_subsets)))
         #print(all_subsets)
         # if one proper subset has a metapath to subset2 then not input dominant
-        for subset in all_subsets:
-            if isinstance(subset, tuple):
-                subset = set(list(subset))
+        if len(all_subsets) > 100:
+            print(metapath.source.intersection(self.variables_set))
+            print(metapath.target)
+            print(all_subsets)
+            print("sort")
+            print(sorted(all_subsets))
+            print()
+        #TODO SORT Tuples by 1el then second then ...
+        for subset_tuple in sorted(all_subsets):
+            if isinstance(subset_tuple, tuple):
+                subset = set(list(subset_tuple))
+            #if len(all_subsets) > 2:
+            #    print(subset)
             # must be proper subset
             if len(subset) < len(metapath.source.intersection(self.variables_set)):
                 metapath1 = self.get_all_metapaths_from(subset, metapath.target)
