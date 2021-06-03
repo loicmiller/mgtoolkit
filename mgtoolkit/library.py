@@ -661,6 +661,8 @@ class Metagraph(object):
             self.a_star = self.get_closure().tolist()
             #print('closure computation- %s'%(time.time()- start))
 
+        #print("Can I compute a_star? Yes")
+
         metapaths = []
         all_applicable_input_rows = []
         for x_i in sorted(source):
@@ -2341,7 +2343,7 @@ class MetagraphHelper:
 
         if adjacency_matrix1 is None:
             raise MetagraphException('adjacency_matrix1', resources['value_null'])
-        if adjacency_matrix2 is None:
+        if adjacency_mattriplerix2 is None:
             raise MetagraphException('adjacency_matrix2', resources['value_null'])
         if generator_set1 is None or len(generator_set1) == 0:
             raise MetagraphException('generator_set1', resources['value_null'])
@@ -2364,6 +2366,16 @@ class MetagraphHelper:
             return None
 
         return result
+
+    def are_triple_edges_unique(self, edges):
+        seen = []
+        for edge in edges:
+            if not MetagraphHelper().is_edge_in_list(edge, seen):
+                seen.append(edge)
+            else:
+                return False
+        return True
+
 
     def multiply_components(self, adjacency_matrix1, adjacency_matrix2, generator_set1, i, j, size):
         """ Multiplies elements of two adjacency matrices.
@@ -2388,11 +2400,15 @@ class MetagraphHelper:
         for k in range(size):
             a_ik = adjacency_matrix1[i][k]
             b_kj = adjacency_matrix2[k][j]
+            #print('a_ik: {}, b_kj: {}, i: {}, j: {}, k: {}'.format(a_ik, b_kj, sorted(list(generator_set1))[i],
+            #                                  sorted(list(generator_set1))[j], sorted(list(generator_set1))[k]))
             temp = self.multiply_triple_lists(a_ik, b_kj, sorted(list(generator_set1))[i],
                                               sorted(list(generator_set1))[j], sorted(list(generator_set1))[k])
 
             if temp is not None and len(temp)>0:
-                result+=temp
+                for triple in temp:
+                    if MetagraphHelper().are_triple_edges_unique(triple.edges):
+                        result.append(triple)
 
         if len(result) == 0:
             return None
