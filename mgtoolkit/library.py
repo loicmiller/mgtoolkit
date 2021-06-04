@@ -2330,6 +2330,7 @@ class MetagraphHelper:
 
         return resultant_adjacency_matrix
 
+    '''
     def multiply_components(self, adjacency_matrix1, adjacency_matrix2, generator_set1, i, j, size):
         """ Multiplies elements of two adjacency matrices.
         :param adjacency_matrix1: numpy.matrix
@@ -2343,7 +2344,7 @@ class MetagraphHelper:
 
         if adjacency_matrix1 is None:
             raise MetagraphException('adjacency_matrix1', resources['value_null'])
-        if adjacency_mattriplerix2 is None:
+        if adjacency_matrix2 is None:
             raise MetagraphException('adjacency_matrix2', resources['value_null'])
         if generator_set1 is None or len(generator_set1) == 0:
             raise MetagraphException('generator_set1', resources['value_null'])
@@ -2366,6 +2367,7 @@ class MetagraphHelper:
             return None
 
         return result
+    '''
 
     def are_triple_edges_unique(self, edges):
         seen = []
