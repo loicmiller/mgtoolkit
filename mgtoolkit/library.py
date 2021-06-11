@@ -662,6 +662,10 @@ class Metagraph(object):
             #print('closure computation- %s'%(time.time()- start))
 
         #print("Can I compute a_star? Yes")
+        #for line in self.a_star:
+        #    print(line)
+
+        # OK UNTIL HERE
 
         metapaths = []
         all_applicable_input_rows = []
@@ -720,15 +724,21 @@ class Metagraph(object):
             else:
                 break
 
+        #print("metapaths")
+        #print(metapaths)
+
         if len(metapaths)>0:
 
             valid_metapaths = []
             processed_edge_lists=[]
             from itertools import combinations
             for metapath in metapaths:
-                if len(metapath)>25:
-                   continue
+                # THIS WAS UNCOMMENTED, BUT SEEMS LIKE A PERFORMANCE ISSUE
+                #if len(metapath)>25:
+                #   continue
                 all_subsets = sum([list(combinations(list(metapath), r)) for r in range(1, len(list(metapath))+1)], [])
+                #print("all_subsets")
+                #print(all_subsets)
                 for path in all_subsets:
                     if len(path) <= len(metapath): # metapaths
                         edge_list2 = self.get_edge_list2(path)
@@ -736,6 +746,8 @@ class Metagraph(object):
                             if MetagraphHelper().is_edge_list_included(edge_list2,processed_edge_lists):
                                 continue
                         mp = Metapath(source, target, edge_list2)
+                        #print(mp)
+                        #print(self.is_metapath(mp))
                         if self.is_metapath(mp):
                             valid_metapaths.append(mp)
             return valid_metapaths
@@ -833,8 +845,14 @@ class Metagraph(object):
                 if output_elt not in all_outputs:
                     all_outputs.append(output_elt)
 
+        #print("all_inputs: {}".format(all_inputs))
+        #print("all_outputs: {}".format(all_outputs))
+        #print("cand source: {}".format(metapath_candidate.source))
+        #print("First cond: {}".format(set(all_inputs).difference(set(all_outputs)).issubset(metapath_candidate.source)))
+        #print("First cond mod: {}".format(metapath_candidate.source.issubset(set(all_inputs).difference(set(all_outputs)))))
+        #print("Second cond: {}".format(set(metapath_candidate.target).issubset(all_outputs)))
         # now check input and output sets
-        if (set(all_inputs).difference(set(all_outputs)).issubset(metapath_candidate.source)) and \
+        if (metapath_candidate.source.issubset(set(all_inputs).difference(set(all_outputs)))) and \
            set(metapath_candidate.target).issubset(all_outputs):
             return True
 
