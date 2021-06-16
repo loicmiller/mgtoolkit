@@ -606,6 +606,54 @@ class Metagraph(object):
 
         return self
 
+
+    def print_matrix(self, matrix):
+        s = [[str(e) for e in row] for row in matrix]
+        lens = [max(map(len, col)) for col in zip(*s)]
+        fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+        table = [fmt.format(*row) for row in s]
+        print('\n'.join(table))
+
+    # Check if an edge is in a list of edges
+    def edge_in_list(self, edge, edges):
+        for edge_from_list in edges:
+            if edge.invertex == edge_from_list.invertex and edge.outvertex == edge_from_list.outvertex:
+                return True
+        return False
+
+    def check_edges_for_duplicates(self, edges):
+        unique_edges = []
+        for edge in edges:
+            if not self.edge_in_list(edge, unique_edges):
+                unique_edges.append(edge)
+            else:
+                print("Duplicate edges!")
+                print(edge)
+                print(unique_edges)
+                sys.exit(0)
+
+    def triple_in_list(self, triple, triples):
+        for triple_from_list in triples:
+            if triple.coinputs == triple_from_list.coinputs and triple.cooutputs == triple_from_list.cooutputs:
+                for edge in triple.edges:
+                    if not self.edge_in_list(edge, triple_from_list.edges):
+                        return False
+                return True
+        return False
+
+    def check_triples_for_duplicates(self, triples):
+        unique_triples = []
+        for triple in triples:
+            if not self.triple_in_list(triple, unique_triples):
+                unique_triples.append(triple)
+            else:
+                print("Duplicate triples!")
+                print(triple)
+                print()
+                print(unique_triples)
+                sys.exit(0)
+
+
     def get_closure(self):
         """ Returns the closure matrix (i.e., A*) of the metagraph.
         :return: numpy.matrix
@@ -619,21 +667,39 @@ class Metagraph(object):
         a[i] = adjacency_matrix
         a_star = adjacency_matrix
 
+        print("Matrix a[0]:")
+        self.print_matrix(a[0])
+        print()
         for i in range(size):
-            #print(' iteration %s --------------'%i)
+            print("Iteration {}".format(i))
+
+            print(' iteration %s --------------'%i)
             a[i+1] = MetagraphHelper().multiply_adjacency_matrices(a[i],
                                                                    self.generating_set,
                                                                    adjacency_matrix,
                                                                    self.generating_set)
-            #print('multiply_adjacency_matrices complete')
+            print('multiply_adjacency_matrices complete')
             a_star = MetagraphHelper().add_adjacency_matrices(a_star,
                                                               self.generating_set,
                                                               a[i+1],
                                                               self.generating_set)
-            #print('add_adjacency_matrices complete')
+            #print("Matrix a[i+1]:")
+            #self.print_matrix(a[i+1])
+            print()
+
+            # Checking edges for duplicates
+            for line in a[i+1]:
+                for cell in line:
+                    if cell is not None:
+                        self.check_triples_for_duplicates(cell)
+                        for triple in cell:
+                            self.check_edges_for_duplicates(triple.edges)
+
+            print('add_adjacency_matrices complete')
             if a[i+1] == a[i]:
                 break
 
+        print('\n')
         # noinspection PyCallingNonCallable
         return matrix(a_star)
 
@@ -2437,7 +2503,65 @@ class MetagraphHelper:
         for el in result:
             if el not in unique_result:
                 unique_result.append(el)
+
+        for triple in unique_result:
+            if self.check_edges_for_duplicates_m(triple.edges):
+                sys.exit(0)
+        if self.check_triples_for_duplicates_m(unique_result):
+            unique_result = self.remove_duplicate_triples_m(unique_result)
         return unique_result
+
+    # Check if an edge is in a list of edges
+    def edge_in_list_m(self, edge, edges):
+        for edge_from_list in edges:
+            if edge.invertex == edge_from_list.invertex and edge.outvertex == edge_from_list.outvertex:
+                return True
+        return False
+
+    def check_edges_for_duplicates_m(self, edges):
+        unique_edges = []
+        for edge in edges:
+            if not self.edge_in_list_m(edge, unique_edges):
+                unique_edges.append(edge)
+            else:
+                print("Duplicate edges mul!")
+                print(edge)
+                print(unique_edges)
+
+    def triple_in_list_m(self, triple, triples):
+        for triple_from_list in triples:
+            if triple.coinputs == triple_from_list.coinputs and triple.cooutputs == triple_from_list.cooutputs:
+                for edge in triple.edges:
+                    if not self.edge_in_list_m(edge, triple_from_list.edges):
+                        return False
+                return True
+        return False
+
+    def check_triples_for_duplicates_m(self, triples):
+        unique_triples = []
+        for triple in triples:
+            if not self.triple_in_list_m(triple, unique_triples):
+                unique_triples.append(triple)
+            else:
+                #print("Duplicate triples mul check!")
+                #print(triple)
+                #print()
+                #print(unique_triples)
+                return True
+        return False
+
+    def remove_duplicate_triples_m(self, triples):
+        unique_triples = []
+        for triple in triples:
+            if not self.triple_in_list_m(triple, unique_triples):
+                unique_triples.append(triple)
+            #else:
+                #print("Duplicate triples mul removed!")
+                #print(triple)
+                #print()
+                #print(unique_triples)
+        return unique_triples
+
 
     def multiply_triple_lists(self, triple_list1, triple_list2, x_i, x_j, x_k):
         """ Multiplies two list of Triple objects and returns the result.
