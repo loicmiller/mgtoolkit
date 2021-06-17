@@ -667,39 +667,52 @@ class Metagraph(object):
         a[i] = adjacency_matrix
         a_star = adjacency_matrix
 
-        print("Matrix a[0]:")
-        self.print_matrix(a[0])
-        print()
+        #print("Matrix a[0]:")
+        #self.print_matrix(a[0])
+        #print()
         for i in range(size):
-            print("Iteration {}".format(i))
+            #print(' iteration %s --------------'%i)
 
-            print(' iteration %s --------------'%i)
+            #print("Matrix a[i] before:")
+            #self.print_matrix(a[i+1])
+            #print(a[i])
+            #print()
+
             a[i+1] = MetagraphHelper().multiply_adjacency_matrices(a[i],
                                                                    self.generating_set,
                                                                    adjacency_matrix,
                                                                    self.generating_set)
-            print('multiply_adjacency_matrices complete')
+
+            #print('multiply_adjacency_matrices complete')
             a_star = MetagraphHelper().add_adjacency_matrices(a_star,
                                                               self.generating_set,
                                                               a[i+1],
                                                               self.generating_set)
-            #print("Matrix a[i+1]:")
+
+            #print("Matrix a[i+1] after:")
             #self.print_matrix(a[i+1])
-            print()
+            #print(a[i+1])
+            #print()
+
+            #print("Matrix a_star after:")
+            #self.print_matrix(a[i+1])
+            #print(a_star)
+            #print()
 
             # Checking edges for duplicates
+            '''
             for line in a[i+1]:
                 for cell in line:
                     if cell is not None:
                         self.check_triples_for_duplicates(cell)
                         for triple in cell:
                             self.check_edges_for_duplicates(triple.edges)
+            '''
 
-            print('add_adjacency_matrices complete')
+            #print('add_adjacency_matrices complete')
             if a[i+1] == a[i]:
                 break
 
-        print('\n')
         # noinspection PyCallingNonCallable
         return matrix(a_star)
 
@@ -2300,8 +2313,10 @@ class MetagraphHelper:
                         combined_adjacency_matrix[i][j] = adjacency_matrix1[i][j]
                     else:
                         temp = list()
-                        temp.append(adjacency_matrix1[i][j])
-                        temp.append(adjacency_matrix2[i][j])
+                        for el in adjacency_matrix1[i][j]:
+                            temp.append(el)
+                        for el in adjacency_matrix2[i][j]:
+                            temp.append(el)
                         combined_adjacency_matrix[i][j] = temp
 
         else:
