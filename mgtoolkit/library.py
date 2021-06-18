@@ -160,7 +160,10 @@ class Edge(object):
                 self.attributes == other.attributes)
 
     def __hash__(self): # https://stackoverflow.com/questions/55753498/hash-method-is-defaulted-in-python-2-not-python-3
-        return hash((str(sorted(list(self.invertex))), str(sorted(list(self.outvertex))), str(sorted(list(self.attributes)))))
+        if self.attributes is None:
+            return hash((str(sorted(list(self.invertex))), str(sorted(list(self.outvertex)))))
+        else:
+            return hash((str(sorted(list(self.invertex))), str(sorted(list(self.outvertex))), str(sorted(list(self.attributes)))))
 
 
 class Metapath(object):
