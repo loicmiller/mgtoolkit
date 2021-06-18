@@ -7,6 +7,62 @@ import math
 import datetime
 now = str(datetime.datetime.now().isoformat())
 
+import threading
+
+# Class for a single thread
+class my_thread(threading.Thread):
+
+    # Variables containing a chunk of the total data
+    chunk = []
+
+    def __init__(self, chunk, adjacency_matrix1, adjacency_matrix2, generator_set1, size):
+        threading.Thread.__init__(self)
+
+        # Init chunk variables
+        self.chunk = chunk
+        self.adjacency_matrix1 = adjacency_matrix1
+        self.adjacency_matrix2 = adjacency_matrix2
+        self.generator_set1 = generator_set1
+        self.size = size
+        self.results = {}
+
+    # Function applied on chunk
+    def run(self):
+        for element in self.chunk:
+            if element[0] not in self.results:
+                self.results[element[0]] = {}
+            self.results[element[0]][element[1]] = MetagraphHelper().multiply_components(self.adjacency_matrix1,
+                                                                    self.adjacency_matrix2,
+                                                                    self.generator_set1, element[0],
+                                                                    element[1], self.size)
+
+
+# Function calling the threads
+def threads_call(placeholders, chunk_size, adjacency_matrix1, adjacency_matrix2, generator_set1, size):
+    resultant_adjacency_matrix = MetagraphHelper().get_null_matrix(size, size)
+    # Create thread chunks
+    thread_chunks = [placeholders[i:i + chunk_size] for i in range(0, len(placeholders), chunk_size)]
+
+    threads = []
+
+    for chunk in thread_chunks:
+        thread = my_thread(chunk, adjacency_matrix1, adjacency_matrix2, generator_set1, size)
+        threads += [thread]
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+        #print("THREAD")
+        #print(thread.results)
+
+        # Update global structure
+        for i in thread.results.keys():
+            for j in thread.results[i].keys():
+                resultant_adjacency_matrix[i][j] = thread.results[i][j]
+
+    return resultant_adjacency_matrix
+
 
 def singleton(cls):
     """A helper function to ease implementing singletons.
@@ -674,14 +730,14 @@ class Metagraph(object):
         #self.print_matrix(a[0])
         #print()
         for i in range(size):
-            #print(' iteration %s --------------'%i)
+            print(' iteration %s --------------'%i)
 
             #print("Matrix a[i] before:")
             #self.print_matrix(a[i+1])
             #print(a[i])
             #print()
 
-            a[i+1] = MetagraphHelper().multiply_adjacency_matrices(a[i],
+            a[i+1] = MetagraphHelper().multiply_adjacency_matrices_parallel(a[i],
                                                                    self.generating_set,
                                                                    adjacency_matrix,
                                                                    self.generating_set)
@@ -2429,6 +2485,44 @@ class MetagraphHelper:
                                                                             generator_set1, i,
                                                                             j, size)
                 #print('multiply_components')
+
+        return resultant_adjacency_matrix
+
+    def multiply_adjacency_matrices_parallel(self, adjacency_matrix1, generator_set1, adjacency_matrix2, generator_set2):
+        """ Multiplies the two adjacency matrices provided and returns the result.
+        :param adjacency_matrix1: numpy.matrix
+        :param generator_set1: set
+        :param adjacency_matrix2: numpy.matrix
+        :param generator_set2: set
+        :return: numpy.matrix
+        """
+
+        if adjacency_matrix1 is None:
+            raise MetagraphException('adjacency_matrix1', resources['value_null'])
+        if adjacency_matrix2 is None:
+            raise MetagraphException('adjacency_matrix2', resources['value_null'])
+
+        if generator_set1 is None:
+            raise MetagraphException('generator_set1', resources['value_null'])
+        if generator_set2 is None:
+            raise MetagraphException('generator_set2', resources['value_null'])
+
+        # check generating sets are identical
+        if not(len(generator_set1.difference(generator_set2)) == 0 and
+               len(generator_set2.difference(generator_set1)) == 0):
+            raise MetagraphException('generator_sets', resources['not_identical'])
+
+        size = len(generator_set1)
+        resultant_adjacency_matrix = MetagraphHelper().get_null_matrix(size, size)
+
+        indices = []
+        for i in range(size):
+            for j in range(size):
+                indices.append((i,j))
+
+        resultant_adjacency_matrix = threads_call(indices, 10, adjacency_matrix1, adjacency_matrix2, generator_set1, size)
+
+        #print('multiply_components')
 
         return resultant_adjacency_matrix
 
