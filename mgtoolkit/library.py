@@ -9,6 +9,8 @@ now = str(datetime.datetime.now().isoformat())
 
 import threading
 
+from pprint import pprint
+
 # Class for a single thread
 class my_thread(threading.Thread):
 
@@ -28,20 +30,20 @@ class my_thread(threading.Thread):
 
     # Function applied on chunk
     def run(self):
-        for element in self.chunk:
-            if element[0] not in self.results:
-                self.results[element[0]] = {}
-            self.results[element[0]][element[1]] = MetagraphHelper().multiply_components(self.adjacency_matrix1,
+        for indices in self.chunk:
+            if indices[0] not in self.results:
+                self.results[indices[0]] = {}
+            self.results[indices[0]][indices[1]] = MetagraphHelper().multiply_components(self.adjacency_matrix1,
                                                                     self.adjacency_matrix2,
-                                                                    self.generator_set1, element[0],
-                                                                    element[1], self.size)
+                                                                    self.generator_set1, indices[0],
+                                                                    indices[1], self.size)
 
 
 # Function calling the threads
-def threads_call(placeholders, chunk_size, adjacency_matrix1, adjacency_matrix2, generator_set1, size):
-    resultant_adjacency_matrix = MetagraphHelper().get_null_matrix(size, size)
+def threads_call(indices, size, adjacency_matrix1, adjacency_matrix2, generator_set1):
     # Create thread chunks
-    thread_chunks = [placeholders[i:i + chunk_size] for i in range(0, len(placeholders), chunk_size)]
+    chunk_size = size
+    thread_chunks = [indices[i:i + chunk_size] for i in range(0, len(indices), chunk_size)]
 
     threads = []
 
@@ -50,16 +52,18 @@ def threads_call(placeholders, chunk_size, adjacency_matrix1, adjacency_matrix2,
         threads += [thread]
         thread.start()
 
+
+    resultant_adjacency_matrix = MetagraphHelper().get_null_matrix(size, size)
     for thread in threads:
         thread.join()
 
         #print("THREAD")
-        #print(thread.results)
+        #print(thread.chunk)
+        #pprint(thread.results)
 
         # Update global structure
-        for i in thread.results.keys():
-            for j in thread.results[i].keys():
-                resultant_adjacency_matrix[i][j] = thread.results[i][j]
+        for i, j in thread.chunk:
+            resultant_adjacency_matrix[i][j] = thread.results[i][j]
 
     return resultant_adjacency_matrix
 
@@ -2520,7 +2524,7 @@ class MetagraphHelper:
             for j in range(size):
                 indices.append((i,j))
 
-        resultant_adjacency_matrix = threads_call(indices, 10, adjacency_matrix1, adjacency_matrix2, generator_set1, size)
+        resultant_adjacency_matrix = threads_call(indices, size, adjacency_matrix1, adjacency_matrix2, generator_set1)
 
         #print('multiply_components')
 
